@@ -1,13 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    script src="strong_password_generator.jsx"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>strong_password_generator</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Strong Password Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
- <h1>Password Generator</h1>
-  <script src="strong_password_generator.js"></script>    
+
+<body class="bg-gray-900 text-white font-sans min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-gray-800 rounded-2xl shadow-lg p-6 max-w-md w-full space-y-6">
+        <h1 class="text-2xl font-bold text-center">🔐 Strong Password Generator</h1>
+
+        <!-- Password Display -->
+        <div class="flex items-center bg-gray-700 rounded-lg p-3 justify-between">
+            <input type="text" id="password" class="bg-transparent text-lg w-full outline-none" readonly />
+            <button onclick="copyPassword()" class="ml-3 text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-lg">Copy</button>
+        </div>
+
+        <!-- Options -->
+        <div class="space-y-4">
+            <div>
+                <label for="length" class="block mb-1">Length: <span id="lengthVal">12</span></label>
+                <input type="range" id="length" min="4" max="40" value="12" class="w-full">
+            </div>
+            <div class="flex flex-col space-y-2">
+                <label><input type="checkbox" id="uppercase" checked /> Uppercase Letters</label>
+                <label><input type="checkbox" id="lowercase" checked /> Lowercase Letters</label>
+                <label><input type="checkbox" id="numbers" checked /> Numbers</label>
+                <label><input type="checkbox" id="symbols" checked /> Symbols</label>
+            </div>
+        </div>
+
+        <!-- Strength Meter -->
+        <div class="h-2 bg-gray-700 rounded overflow-hidden">
+            <div id="strengthBar" class="h-full bg-green-500 w-1/2 transition-all duration-300 ease-in-out"></div>
+        </div>
+
+        <!-- Generate Button -->
+        <button onclick="generatePassword()" class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-lg font-semibold">Generate Password</button>
+    </div>
+
+    <!-- Script -->
+    <script>
+        const lengthInput = document.getElementById('length');
+        const lengthVal = document.getElementById('lengthVal');
+        const passwordField = document.getElementById('password');
+        const strengthBar = document.getElementById('strengthBar');
+
+        function generatePassword() {
+            const length = +lengthInput.value;
+            const useUpper = document.getElementById('uppercase').checked;
+            const useLower = document.getElementById('lowercase').checked;
+            const useNumbers = document.getElementById('numbers').checked;
+            const useSymbols = document.getElementById('symbols').checked;
+
+            let chars = '';
+            const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const lower = "abcdefghijklmnopqrstuvwxyz";
+            const numbers = "0123456789";
+            const symbols = "!@#$%^&*()_+-=[]{}|;:,.<>?/";
+
+            if (useUpper) chars += upper;
+            if (useLower) chars += lower;
+            if (useNumbers) chars += numbers;
+            if (useSymbols) chars += symbols;
+
+            if (!chars) {
+                alert('Please select at least one option.');
+                return;
+            }
+
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                password += chars[Math.floor(Math.random() * chars.length)];
+            }
+
+            passwordField.value = password;
+            updateStrength(length, [useUpper, useLower, useNumbers, useSymbols]);
+        }
+
+        function updateStrength(length, types) {
+            const activeTypes = types.filter(Boolean).length;
+            let strength = (length / 40) * 25 + activeTypes * 15;
+            strength = Math.min(strength, 100);
+            strengthBar.style.width = strength + '%';
+
+            if (strength < 40) {
+                strengthBar.className = 'h-full bg-red-500';
+            } else if (strength < 70) {
+                strengthBar.className = 'h-full bg-yellow-500';
+            } else {
+                strengthBar.className = 'h-full bg-green-500';
+            }
+        }
+
+        function copyPassword() {
+            const text = passwordField.value;
+            if (!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Password copied!');
+            });
+        }
+
+        // Events
+        lengthInput.addEventListener('input', () => {
+            lengthVal.textContent = lengthInput.value;
+        });
+
+        // Generate a default password on load
+        window.onload = generatePassword;
+    </script>
 </body>
+
 </html>
